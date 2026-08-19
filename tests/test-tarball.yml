@@ -1,0 +1,25 @@
+name: Test tarball binary installation
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: install
+        uses: .
+        with:
+          binary: helm
+          version: "3.14.0"
+          download_url: "https://get.helm.sh/${binary}-v${version}-linux-amd64.tar.gz"
+          tarball_binary_path: "linux-amd64/${binary}"
+          smoke_test: "${binary} version"
+
+      - name: Assert helm is installed and executable
+        run: |
+          echo "Checking helm is available in PATH..."
+          which helm || { echo "FAIL: helm not found in PATH"; exit 1; }
+          echo "Running helm version..."
+          helm version || { echo "FAIL: helm version failed"; exit 1; }
+          echo "PASS: helm installed successfully from tarball"

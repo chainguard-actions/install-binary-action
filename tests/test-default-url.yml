@@ -1,0 +1,23 @@
+name: Test default giantswarm URL template
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: install
+        uses: .
+        with:
+          binary: devctl
+          version: "4.10.0"
+          smoke_test: "${binary} version"
+
+      - name: Assert devctl is installed and executable
+        run: |
+          echo "Checking devctl is available in PATH..."
+          which devctl || { echo "FAIL: devctl not found in PATH"; exit 1; }
+          echo "Running devctl version..."
+          devctl version || { echo "FAIL: devctl version failed"; exit 1; }
+          echo "PASS: devctl installed using default giantswarm URL template"
