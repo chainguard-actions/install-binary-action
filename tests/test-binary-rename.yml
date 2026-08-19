@@ -1,0 +1,39 @@
+name: Test binary rename after installation
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: install
+        name: Install aws-nuke with renamed binary
+        uses: .
+        with:
+          binary: aws-nuke
+          version: "v2.25.0"
+          download_url: "https://github.com/rebuy-de/aws-nuke/releases/download/${version}/aws-nuke-${version}-linux-amd64.tar.gz"
+          tarball_binary_path: "aws-nuke-${version}-linux-amd64"
+          smoke_test: "${binary} version"
+          binary_new_name: "aws-nuke"
+
+      - name: Assert renamed binary is on PATH
+        run: |
+          echo "Checking aws-nuke is on PATH..."
+          if ! command -v aws-nuke > /dev/null 2>&1; then
+            echo "FAIL: aws-nuke not found on PATH"
+            exit 1
+          fi
+          echo "PASS: aws-nuke found at $(command -v aws-nuke)"
+
+      - name: Assert renamed binary works
+        run: |
+          echo "Running aws-nuke version..."
+          OUTPUT=$(aws-nuke version 2>&1)
+          echo "Output: $OUTPUT"
+          if [ -z "$OUTPUT" ]; then
+            echo "FAIL: aws-nuke version produced no output"
+            exit 1
+          fi
+          echo "PASS: renamed binary works"

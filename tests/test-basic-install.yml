@@ -1,0 +1,37 @@
+name: Test basic binary installation (unarchived binary)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: install
+        name: Install vendir as unarchived binary
+        uses: .
+        with:
+          binary: vendir
+          version: "0.40.2"
+          download_url: "https://github.com/carvel-dev/vendir/releases/download/v${version}/vendir-linux-amd64"
+          smoke_test: "${binary} --version"
+
+      - name: Assert binary is installed and executable
+        run: |
+          echo "Checking vendir is on PATH..."
+          if ! command -v vendir > /dev/null 2>&1; then
+            echo "FAIL: vendir not found on PATH"
+            exit 1
+          fi
+          echo "PASS: vendir found at $(command -v vendir)"
+
+      - name: Assert smoke test passes
+        run: |
+          echo "Running vendir --version..."
+          OUTPUT=$(vendir --version 2>&1)
+          echo "Output: $OUTPUT"
+          if [ -z "$OUTPUT" ]; then
+            echo "FAIL: vendir --version produced no output"
+            exit 1
+          fi
+          echo "PASS: smoke test passed"

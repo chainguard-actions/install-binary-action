@@ -1,0 +1,37 @@
+name: Test plain binary installation (no tarball)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: install
+        name: Install jq as plain binary (no tarball)
+        uses: .
+        with:
+          binary: jq
+          version: "1.7.1"
+          download_url: "https://github.com/jqlang/jq/releases/download/jq-${version}/jq-linux-amd64"
+          smoke_test: "${binary} --version"
+
+      - name: Assert jq is installed and executable
+        run: |
+          echo "Checking jq is on PATH..."
+          if ! command -v jq > /dev/null 2>&1; then
+            echo "FAIL: jq not found on PATH"
+            exit 1
+          fi
+          echo "PASS: jq found at $(command -v jq)"
+
+      - name: Assert jq version works
+        run: |
+          echo "Running jq --version..."
+          OUTPUT=$(jq --version 2>&1)
+          echo "Output: $OUTPUT"
+          if [ -z "$OUTPUT" ]; then
+            echo "FAIL: jq --version produced no output"
+            exit 1
+          fi
+          echo "PASS: jq version works: $OUTPUT"
