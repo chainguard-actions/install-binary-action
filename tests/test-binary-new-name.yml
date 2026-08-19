@@ -1,4 +1,4 @@
-name: Test binary_new_name input
+name: Test binary installation with custom name
 on:
   workflow_dispatch:
 jobs:
@@ -12,12 +12,12 @@ jobs:
           binary: jq
           version: "1.6"
           download_url: "https://github.com/stedolan/jq/releases/download/jq-${version}/${binary}-linux64"
-          smoke_test: "${binary_new_name} --version"
+          smoke_test: "myjq --version"
           binary_new_name: myjq
       - name: Assert renamed binary is installed and executable
         run: |
-          echo "Checking myjq is available in PATH"
+          echo "Checking myjq is available in PATH..."
           which myjq || { echo "FAIL: myjq not found in PATH"; exit 1; }
-          echo "Running myjq --version"
+          echo "Running myjq --version..."
           myjq --version || { echo "FAIL: myjq --version failed"; exit 1; }
           echo "PASS"

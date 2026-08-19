@@ -15,8 +15,8 @@ jobs:
           smoke_test: "${binary} --version"
       - name: Assert binary is installed and executable
         run: |
-          echo "Checking jq is available in PATH"
+          echo "Checking jq is available in PATH..."
           which jq || { echo "FAIL: jq not found in PATH"; exit 1; }
-          echo "Running jq --version"
+          echo "Running jq --version..."
           jq --version || { echo "FAIL: jq --version failed"; exit 1; }
           echo "PASS"
