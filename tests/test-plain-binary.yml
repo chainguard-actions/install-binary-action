@@ -1,4 +1,4 @@
-name: Test basic binary installation (tarball with subdirectory)
+name: Test plain binary installation (no tarball)
 on:
   workflow_dispatch:
 jobs:
@@ -7,35 +7,34 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Install helm from tarball
+      - name: Install jq as a plain binary (no archive extension)
         id: action
         uses: .
         continue-on-error: true
         with:
-          binary: helm
-          version: "3.14.0"
-          download_url: "https://get.helm.sh/helm-v${version}-linux-amd64.tar.gz"
-          tarball_binary_path: "linux-amd64/helm"
-          smoke_test: "helm version"
+          binary: jq
+          version: "1.7.1"
+          download_url: "https://github.com/jqlang/jq/releases/download/jq-${version}/jq-linux-amd64"
+          smoke_test: "jq --version"
 
-      - name: Assert binary is installed or action failed gracefully
+      - name: Assert jq is installed or action failed gracefully
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "action outcome: $OUTCOME"
           if [ "$OUTCOME" = "success" ]; then
-            echo "Checking helm is on PATH..."
-            if ! command -v helm > /dev/null 2>&1; then
-              echo "FAIL: helm not found on PATH after successful action"
+            echo "Checking jq is on PATH..."
+            if ! command -v jq > /dev/null 2>&1; then
+              echo "FAIL: jq not found on PATH after successful action"
               exit 1
             fi
-            echo "PASS: helm found at $(command -v helm)"
-            OUTPUT=$(helm version 2>&1)
+            echo "PASS: jq found at $(command -v jq)"
+            OUTPUT=$(jq --version 2>&1)
             echo "Output: $OUTPUT"
-            if echo "$OUTPUT" | grep -q "3.14.0"; then
+            if echo "$OUTPUT" | grep -q "1.7.1"; then
               echo "PASS: correct version installed"
             else
-              echo "FAIL: expected version 3.14.0 in output, got: $OUTPUT"
+              echo "FAIL: expected version 1.7.1 in output, got: $OUTPUT"
               exit 1
             fi
           elif [ "$OUTCOME" = "failure" ]; then

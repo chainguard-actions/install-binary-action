@@ -1,0 +1,17 @@
+# DO NOT EDIT. Generated with:
+#
+#    devctl
+#
+#    https://github.com/giantswarm/devctl/blob/ad0a25fbf301b2513e169ec964a8785d28f75be4/pkg/gen/input/workflows/internal/file/gitleaks.yaml.template
+#
+name: gitleaks
+
+on:
+  - pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    uses: giantswarm/github-workflows/.github/workflows/gitleaks.yaml@4014c2d7776bc9f81df0d7a84e8f597cc3699b9d # main

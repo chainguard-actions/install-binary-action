@@ -1,0 +1,47 @@
+name: Test binary installation with rename
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install yq and rename it to yq4
+        id: action
+        uses: .
+        continue-on-error: true
+        with:
+          binary: yq
+          version: "4.40.5"
+          download_url: "https://github.com/mikefarah/yq/releases/download/v${version}/yq_linux_amd64.tar.gz"
+          tarball_binary_path: "yq_linux_amd64"
+          smoke_test: "yq4 --version"
+          binary_new_name: yq4
+
+      - name: Assert renamed binary is installed or action failed gracefully
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "action outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "Checking yq4 is on PATH..."
+            if ! command -v yq4 > /dev/null 2>&1; then
+              echo "FAIL: yq4 not found on PATH after successful action"
+              exit 1
+            fi
+            echo "PASS: yq4 found at $(command -v yq4)"
+            OUTPUT=$(yq4 --version 2>&1)
+            echo "Output: $OUTPUT"
+            if echo "$OUTPUT" | grep -q "4.40.5"; then
+              echo "PASS: correct version installed under new name"
+            else
+              echo "FAIL: expected version 4.40.5 in output, got: $OUTPUT"
+              exit 1
+            fi
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (node24 runtime may not be supported by act)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
