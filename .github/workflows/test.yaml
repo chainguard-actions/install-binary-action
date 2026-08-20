@@ -1,0 +1,131 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+permissions: {}
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: "24"
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Run yarn install
+        run: yarn install
+      - name: Run yarn lint
+        run: yarn lint
+      - name: Check ./dist/index.js is up to date
+        run: yarn dist && git diff --exit-code
+
+      - name: Test downloading Giant Swarm binary with strict semver
+        uses: ./
+        with:
+          binary: devctl
+          version: "7.2.6"
+
+      - name: Test downloading Giant Swarm binary with v prefix
+        uses: ./
+        with:
+          binary: devctl
+          version: "v7.2.6"
+
+      - name: Test downloading another Giant Swarm binary with v prefix
+        uses: ./
+        with:
+          binary: architect
+          version: "v6.17.0"
+          download_url: "https://github.com/giantswarm/architect/releases/download/${version}/architect-${version}-linux-amd64.tar.gz"
+    
+      - name: Test downloading external binary
+        uses: ./
+        with:
+          binary: semver
+          version: "3.0.0"
+          download_url: "https://github.com/fsaintjacques/${binary}-tool/archive/${version}.tar.gz"
+          tarball_binary_path: "*/src/${binary}"
+          smoke_test: "${binary} --version"
+
+      - name: Test downloading binary with renaming
+        uses: ./
+        with:
+          binary: aws-nuke
+          version: "v2.25.0"
+          download_url: "https://github.com/rebuy-de/aws-nuke/releases/download/${version}/aws-nuke-${version}-linux-amd64.tar.gz"
+          tarball_binary_path: "aws-nuke-${version}-linux-amd64"
+          smoke_test: "${binary} version"
+          binary_new_name: "aws-nuke"
+
+      - name: Test downloading external unarchived binary
+        uses: ./
+        with:
+          binary: "vendir"
+          version: "0.40.2"
+          download_url: "https://github.com/carvel-dev/vendir/releases/download/v${version}/vendir-linux-amd64"
+          smoke_test: "${binary} --version"
+
+      # Regression test for https://github.com/giantswarm/install-binary-action/issues/334
+      # Earlier versions ran `mkdir <binary>` in the workspace and failed when
+      # a file or directory with the same name was already checked out.
+      - name: Pre-create colliding workspace entries (regression for #334)
+        run: |
+          mkdir -p helm
+          touch jq
+      - name: Test tarball install with colliding workspace directory
+        uses: ./
+        with:
+          binary: helm
+          version: "3.17.3"
+          download_url: "https://get.helm.sh/helm-v${version}-linux-amd64.tar.gz"
+          tarball_binary_path: "*/${binary}"
+          smoke_test: "${binary} version"
+      - name: Test unarchived install with colliding workspace file
+        uses: ./
+        with:
+          binary: jq
+          version: "1.7.1"
+          download_url: "https://github.com/jqlang/jq/releases/download/jq-${version}/jq-linux-amd64"
+          smoke_test: "${binary} --version"
+      - name: Cleanup colliding workspace entries
+        if: always()
+        run: rm -rf helm jq
+
+      # End-to-end coverage of the install steps used in the central
+      # pre-commit workflow at giantswarm/github/workflows/zz_generated.pre-commit.yaml.
+      # These tarballs ship the binary at the archive root (no subdirectory),
+      # so tarball_binary_path must not contain a wildcard/slash.
+      - name: Test install of helm-docs (flat tarball, no rename)
+        uses: ./
+        with:
+          binary: helm-docs
+          version: "1.14.2"
+          download_url: "https://github.com/norwoodj/helm-docs/releases/download/v${version}/helm-docs_${version}_Linux_x86_64.tar.gz"
+          tarball_binary_path: "${binary}"
+          smoke_test: "${binary} --version"
+      - name: Verify helm-docs is on PATH
+        run: |
+          which helm-docs
+          helm-docs --version
+      # Regression test for https://github.com/giantswarm/install-binary-action/issues/339:
+      # binary_new_name must support the same ${binary}/${version} template
+      # substitution as download_url, tarball_binary_path, and smoke_test.
+      - name: Test install of helm-values-schema-json (templated binary_new_name)
+        uses: ./
+        with:
+          binary: helm-schema
+          version: "2.3.1"
+          download_url: "https://github.com/losisin/helm-values-schema-json/releases/download/v${version}/helm-values-schema-json_${version}_linux_amd64.tgz"
+          tarball_binary_path: "schema"
+          binary_new_name: "${binary}"
+          smoke_test: "${binary} version"
+      - name: Verify helm-schema is on PATH
+        run: |
+          which helm-schema
+          helm-schema version

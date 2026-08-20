@@ -6,17 +6,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
       - id: action
+        name: Install devctl binary (default URL template)
         uses: .
         with:
-          binary: jq
-          version: "1.6"
-          download_url: "https://github.com/stedolan/jq/releases/download/jq-${version}/${binary}-linux64"
-          smoke_test: "${binary} --version"
+          binary: devctl
+          version: "7.2.6"
+
       - name: Assert binary is installed and executable
         run: |
-          echo "Checking jq is available in PATH..."
-          which jq || { echo "FAIL: jq not found in PATH"; exit 1; }
-          echo "Running jq --version..."
-          jq --version || { echo "FAIL: jq --version failed"; exit 1; }
-          echo "PASS"
+          echo "Checking devctl is on PATH..."
+          which devctl || { echo "FAIL: devctl not found on PATH"; exit 1; }
+          echo "Running devctl version..."
+          devctl version || { echo "FAIL: devctl version failed"; exit 1; }
+          echo "PASS: devctl installed successfully"
