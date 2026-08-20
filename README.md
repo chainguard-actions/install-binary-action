@@ -8,7 +8,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
-| v3.1.1 | [`v3.1.1`](https://github.com/chainguard-actions/giantswarm-install-binary-action/tree/v3.1.1) | — |
+| v3.1.1 | [`v3.1.1`](https://github.com/chainguard-actions/giantswarm-install-binary-action/tree/v3.1.1) | [`0797deb`](https://github.com/giantswarm/install-binary-action/commit/0797deb878056114fa54ee30c519f617716e8c69) |
 | v4.0.0 | [`v4.0.0`](https://github.com/chainguard-actions/giantswarm-install-binary-action/tree/v4.0.0) | [`c94c7ad`](https://github.com/giantswarm/install-binary-action/commit/c94c7adadeb14af4bdbdd601f9a6e7f69638134c) |
 | v4.0.1 | [`v4.0.1`](https://github.com/chainguard-actions/giantswarm-install-binary-action/tree/v4.0.1) | [`952007e`](https://github.com/giantswarm/install-binary-action/commit/952007edaee6637d91216e7001f79aff11e93228) |
 | v4.0.2 | [`v4.0.2`](https://github.com/chainguard-actions/giantswarm-install-binary-action/tree/v4.0.2) | [`e2730ba`](https://github.com/giantswarm/install-binary-action/commit/e2730babbc89f02ef1559b042d33cbe24f5c3547) |
