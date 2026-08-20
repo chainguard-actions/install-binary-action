@@ -1,0 +1,25 @@
+name: Test direct binary installation (no tarball)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install vendir as a direct binary (no tarball extraction)
+        id: install_vendir
+        uses: .
+        with:
+          binary: "vendir"
+          version: "0.40.2"
+          download_url: "https://github.com/carvel-dev/vendir/releases/download/v${version}/vendir-linux-amd64"
+          smoke_test: "${binary} --version"
+
+      - name: Assert vendir is installed and executable
+        run: |
+          echo "Checking vendir is on PATH..."
+          which vendir || { echo "FAIL: vendir not found on PATH"; exit 1; }
+          echo "Running vendir --version..."
+          vendir --version || { echo "FAIL: vendir --version failed"; exit 1; }
+          echo "PASS: direct binary installed successfully"

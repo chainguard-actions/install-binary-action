@@ -1,0 +1,26 @@
+name: Test tarball with nested binary path
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install helm with nested tarball path
+        id: install_helm
+        uses: .
+        with:
+          binary: helm
+          version: "3.16.4"
+          download_url: "https://get.helm.sh/${binary}-v${version}-linux-amd64.tar.gz"
+          tarball_binary_path: "linux-amd64/${binary}"
+          smoke_test: "${binary} version"
+
+      - name: Assert helm is installed and executable
+        run: |
+          echo "Checking helm is on PATH..."
+          which helm || { echo "FAIL: helm not found on PATH"; exit 1; }
+          echo "Running helm version..."
+          helm version || { echo "FAIL: helm version failed"; exit 1; }
+          echo "PASS: helm installed with nested tarball path"

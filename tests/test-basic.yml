@@ -6,21 +6,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - id: action
+
+      - name: Install semver using custom download URL and tarball path
+        id: install_semver
         uses: .
         with:
-          binary: jq
-          version: "1.7.1"
-          download_url: "https://github.com/jqlang/jq/releases/download/jq-${version}/jq-linux-amd64"
+          binary: semver
+          version: "3.0.0"
+          download_url: "https://github.com/fsaintjacques/${binary}-tool/archive/${version}.tar.gz"
+          tarball_binary_path: "*/src/${binary}"
           smoke_test: "${binary} --version"
-      - name: Assert binary is installed and executable
+
+      - name: Assert semver is installed and executable
         run: |
-          echo "Checking jq is available in PATH..."
-          which jq || { echo "FAIL: jq not found in PATH"; exit 1; }
-          JQ_VERSION=$(jq --version 2>&1)
-          echo "jq version: $JQ_VERSION"
-          if ! echo "$JQ_VERSION" | grep -q "jq-"; then
-            echo "FAIL: unexpected version output: $JQ_VERSION"
-            exit 1
-          fi
-          echo "PASS"
+          echo "Checking semver is on PATH..."
+          which semver || { echo "FAIL: semver not found on PATH"; exit 1; }
+          echo "Running semver --version..."
+          semver --version || { echo "FAIL: semver --version failed"; exit 1; }
+          echo "PASS: semver installed successfully"
